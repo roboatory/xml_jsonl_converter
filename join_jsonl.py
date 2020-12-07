@@ -7,9 +7,7 @@ def merge_jsonl(directory, output_name):
 	with open(directory + "/" + output_name, "w") as f1:
 		for file in jsonl_files:
 			with open(directory + "/" + file, "r") as f2:
-				lines = f2.readlines()
-				if len(lines) != 0: # make sure array is not empty
-					f1.write(lines[0] + "\n")
+				f1.write(f2.readline() + "\n")
 
 parser = argparse.ArgumentParser(description = "concatenate jsonl files")
 
