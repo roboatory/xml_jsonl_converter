@@ -1,0 +1,46 @@
+"""
+(c) 2018 David Lee
+
+Author: David Lee
+(Modifications made by Rohit Khurana)
+"""
+
+import argparse
+import tempfile
+
+from xml_to_json.convert_xml_to_json import convert_xml_to_json
+from join_jsonl import merge_jsonl
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description="XML To JSON Parser")
+
+    parser.add_argument("-x", "--xsd_file", required=True, help="xsd file name")
+    parser.add_argument("-o", "--output_format", default="jsonl", help="output format json or jsonl. Default is jsonl.")
+    parser.add_argument("-s", "--server", help="server with hadoop client installed if hadoop not installed")
+    parser.add_argument("-t", "--target_path", help="target path. hdfs targets require hadoop client installation." + 
+        "Examples: /proj/test, hdfs:///proj/test, hdfs://halfarm/proj/test")
+    parser.add_argument("-z", "--zip", action="store_true", help="gzip output file")
+    parser.add_argument("-p", "--xpath", help="xpath to parse out.")
+    parser.add_argument("-a", "--attribpaths", help="extra element attributes to parse out.")
+    parser.add_argument("-e", "--excludepaths", help="elements to exclude. pass in comma separated string." + 
+        "/path/exclude1,/path/exclude2")
+    parser.add_argument("-m", "--multi", type=int, default=1, help="number of parsers. Default is 1.")
+    parser.add_argument("-l", "--log", help="log file")
+    parser.add_argument("-v", "--verbose", default="DEBUG", help="verbose output level. INFO, DEBUG, etc.")
+    parser.add_argument("-n", "--no_overwrite", action="store_true", help="do not overwrite output file if it exists already")
+    parser.add_argument("-d", "--delete_xml", action="store_true", help="delete xml file after converting to json")
+    parser.add_argument("-j", "--join_jsonl", help="join recently converted jsonl files")
+    parser.add_argument("-f", "--final_output_name", help="specify name of final merged jsonl file" + 
+        "(only if join command is not of None type)")
+    parser.add_argument("input_files", nargs=argparse.REMAINDER, help="files to convert")
+
+    args = parser.parse_args()
+
+    convert_xml_to_json(args.xsd_file, args.output_format, args.server, args.target_path, args.zip, 
+        args.xpath, args.attribpaths, args.excludepaths, args.multi, args.no_overwrite, args.verbose, 
+        args.log, args.delete_xml, args.input_files)    
+
+    if (args.join_jsonl != None):
+        directory_name = tempfile.mkdtemp(dir = args.join_jsonl)
+        merge_jsonl(args.join_jsonl, args.final_output_name, directory_name)
